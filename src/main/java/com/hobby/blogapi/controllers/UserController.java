@@ -1,5 +1,6 @@
 package com.hobby.blogapi.controllers;
 
+import com.hobby.blogapi.payloads.ApiResponse;
 import com.hobby.blogapi.payloads.UserDto;
 import com.hobby.blogapi.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,9 +34,9 @@ public class UserController {
 
     @DeleteMapping("/{id}")
 //    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
-        return new ResponseEntity<>(Map.of("Message", "User deleted."), HttpStatus.OK);
+        return new ResponseEntity<>(new ApiResponse("User Deleted success.", true), HttpStatus.OK);
     }
 
     @GetMapping("/")
