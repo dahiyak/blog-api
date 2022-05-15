@@ -5,11 +5,16 @@ import com.hobby.blogapi.entities.PostEntity;
 import com.hobby.blogapi.entities.UserEntity;
 import com.hobby.blogapi.exceptions.ResourceNotFoundException;
 import com.hobby.blogapi.payloads.PostDto;
+import com.hobby.blogapi.payloads.PostResponse;
 import com.hobby.blogapi.repositories.CategoryRepository;
 import com.hobby.blogapi.repositories.PostRepository;
 import com.hobby.blogapi.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -99,6 +104,41 @@ public class PostService {
         post.setContent(postDto.getContent());
         PostEntity savedPost = postRepository.save(post);
         return modelMapper.map(savedPost, PostDto.class);
+    }
+
+    public PostResponse getAllPosts(Integer pageNumber, Integer pageSize, String sortBy, String sortDirection) {
+
+        PostResponse postResponse = new PostResponse();
+
+//        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy));
+
+        Sort sort = Sort.by(sortBy).ascending();
+        if (sortDirection.equalsIgnoreCase("desc")) {
+            sort = Sort.by(sortBy).descending();
+        }
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+        Page<PostEntity> allProducts = postRepository.findAll(pageable);
+
+        List<PostEntity> allContent = allProducts.getContent();
+
+        List<PostDto> postDtos = allContent.stream().map((post) -> modelMapper.map(post, PostDto.class)).collect(Collectors.toList());
+
+        postResponse.setDtoList(postDtos);
+        postResponse.setPageNumber(allProducts.getNumber());
+        postResponse.setPageSize(allProducts.getSize());
+        postResponse.setTotalElements(allProducts.getNumberOfElements());
+        postResponse.setTotalPages(allProducts.getTotalPages());
+        postResponse.setIsLastPage(allProducts.isLast());
+
+        return postResponse;
+
+    }
+
+    public List<PostDto> searchPosts(String keywords){
+//        List<PostEntity> posts = postRepository.findByTitleContaining(keywords);
+        List<PostEntity> posts = postRepository.searchByTitle("%"+keywords+"%");
+        return posts.stream().map((post) -> modelMapper.map(post,PostDto.class)).collect(Collectors.toList());
     }
 
 }
