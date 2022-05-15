@@ -19,7 +19,7 @@ public class UserDto {
 
     private Long userId;
     @NotEmpty
-    @Size(min = 4, message = "User must be min of 4 character")
+    @Size(min = 4, message = "UserEntity must be min of 4 character")
     private String name;
     @Email(message = "email address is not valid")
     private String email;
